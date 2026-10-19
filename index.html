@@ -108,13 +108,23 @@
     }
     .role {
       display: inline-block;
+      position: relative;
+      overflow: hidden;
+      vertical-align: bottom;
+      height: 1.25em;
+      line-height: 1.25em;
       border-bottom: 2px solid #d4ff00;
-      line-height: 1.2;
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      transition: width 0.45s cubic-bezier(.65,0,.35,1);
     }
-    .role.out {
-      opacity: 0;
-      transform: translateY(-6px);
+    .reel {
+      display: block;
+      transition: transform 0.45s cubic-bezier(.65,0,.35,1);
+    }
+    .reel span {
+      display: block;
+      width: max-content;
+      height: 1.25em;
+      white-space: nowrap;
     }
     .intro .w {
       border-radius: 2px;
@@ -131,7 +141,7 @@
       .m-br { display: inline; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .pupil, .role { transition: none; }
+      .pupil, .role, .reel { transition: none; }
     }
   </style>
 </head>
@@ -140,7 +150,7 @@
     <div class="logo-wrap"><img src="logo.png" alt="Strive logo" class="logo"><span class="pupil" aria-hidden="true"></span></div>
     <h1>Strive</h1>
     <p class="intro">
-      <span class="nowrap">A curated place for the top 1% of</span><br class="m-br"> <span class="nowrap"><span class="role w" aria-live="polite">chiefs of staff</span>.</span><br>
+      <span class="nowrap">A curated place for the top 1% of</span><br class="m-br"> <span class="nowrap"><span class="role w" aria-label="chiefs of staff, founding engineers, and tech operators"><span class="reel"><span>chiefs of staff</span></span></span>.</span><br>
       <span class="nowrap">Alongside a global community of 300+ members.</span><br>
       <span class="nowrap">Founders and investors welcome.</span>
     </p>
@@ -159,19 +169,28 @@
     (function () {
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // rotating role
+      // rotating role, rolls like a drum
       var roles = ['chiefs of staff', 'founding engineers', 'tech operators'];
-      var el = document.querySelector('.role');
+      var role = document.querySelector('.role');
+      var reel = role.querySelector('.reel');
       var i = 0;
+      role.style.width = reel.firstElementChild.offsetWidth + 'px';
       if (!reduce) {
         setInterval(function () {
-          el.classList.add('out');
+          i = (i + 1) % roles.length;
+          var next = document.createElement('span');
+          next.textContent = roles[i];
+          reel.appendChild(next);
+          role.style.width = next.offsetWidth + 'px';
+          reel.style.transform = 'translateY(-1.25em)';
           setTimeout(function () {
-            i = (i + 1) % roles.length;
-            el.textContent = roles[i];
-            el.classList.remove('out');
-          }, 250);
-        }, 2200);
+            reel.style.transition = 'none';
+            reel.removeChild(reel.firstElementChild);
+            reel.style.transform = 'none';
+            reel.offsetHeight;
+            reel.style.transition = '';
+          }, 500);
+        }, 2400);
       }
 
       // highlight words on hover
