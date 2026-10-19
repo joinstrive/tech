@@ -87,14 +87,46 @@
     a.footer-link:hover {
       color: #d4ff00;
     }
+    .logo-wrap {
+      position: relative;
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 24px;
+    }
+    .logo-wrap img.logo { margin: 0; }
+    .pupil {
+      position: absolute;
+      left: 49.3%;
+      top: 46.9%;
+      width: 9px;
+      height: 9px;
+      margin: -4.5px 0 0 -4.5px;
+      border-radius: 50%;
+      background: #d4ff00;
+      transition: transform 0.12s ease-out;
+      pointer-events: none;
+    }
+    .role {
+      display: inline-block;
+      border-bottom: 2px solid #d4ff00;
+      line-height: 1.2;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .role.out {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pupil, .role { transition: none; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="logo.png" alt="Strive logo" class="logo">
+    <div class="logo-wrap"><img src="logo.png" alt="Strive logo" class="logo"><span class="pupil" aria-hidden="true"></span></div>
     <h1>Strive</h1>
     <p>
-      A curated place for the top 1% of chiefs of staff, founding engineers, and tech operators.<br>
+      A curated place for the top 1% of <span class="role" aria-live="polite">chiefs of staff</span>.<br>
       Alongside a global community of 300+ members.<br>
       Founders and investors welcome.
     </p>
@@ -109,5 +141,49 @@
       <a class="footer-link" href="https://www.linkedin.com/company/founderassociate/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </div>
+  <script>
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // rotating role
+      var roles = ['chiefs of staff', 'founding engineers', 'tech operators'];
+      var el = document.querySelector('.role');
+      var i = 0;
+      if (!reduce) {
+        setInterval(function () {
+          el.classList.add('out');
+          setTimeout(function () {
+            i = (i + 1) % roles.length;
+            el.textContent = roles[i];
+            el.classList.remove('out');
+          }, 250);
+        }, 2200);
+      }
+
+      // the S watches you
+      var pupil = document.querySelector('.pupil');
+      var wrap = document.querySelector('.logo-wrap');
+      var MAX = 5;
+      function look(x, y) {
+        var r = pupil.getBoundingClientRect();
+        var dx = x - (r.left + r.width / 2);
+        var dy = y - (r.top + r.height / 2);
+        var d = Math.hypot(dx, dy) || 1;
+        var k = Math.min(MAX, d / 20) / d;
+        pupil.style.transform = 'translate(' + dx * k + 'px,' + dy * k + 'px)';
+      }
+      window.addEventListener('mousemove', function (e) { look(e.clientX, e.clientY); });
+      window.addEventListener('touchstart', function (e) {
+        var t = e.touches[0]; look(t.clientX, t.clientY);
+      }, { passive: true });
+      // on touch devices, glance around now and then
+      if (!reduce && !window.matchMedia('(hover: hover)').matches) {
+        setInterval(function () {
+          var w = wrap.getBoundingClientRect();
+          look(w.left + (Math.random() - 0.5) * 400, w.top + (Math.random() - 0.5) * 400);
+        }, 1800);
+      }
+    })();
+  </script>
 </body>
 </html>
