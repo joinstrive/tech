@@ -106,31 +106,16 @@
       transition: transform 0.12s ease-out;
       pointer-events: none;
     }
-    .role {
-      display: inline-block;
-      position: relative;
-      vertical-align: top;
-      height: 1.6em;
-      clip-path: inset(0 -100vw);           /* clip vertically only */
-    }
-    .reel {
-      display: block;
-      transition: transform 0.5s cubic-bezier(.65,0,.35,1);
-    }
-    .reel > span {
-      display: block;
-      height: 1.6em;
-      line-height: 1.6em;
-      text-align: center;
+    .intro .hl {
       white-space: nowrap;
-      transition: opacity 0.5s ease;
-    }
-    .reel .t {
-      font-weight: normal;
-      background: #d4ff00;
-      color: #000;
-      padding: 1px 4px;
       border-radius: 2px;
+      transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+    }
+    .intro .hl.on,
+    .intro .hl:hover {
+      background-color: #d4ff00;
+      color: #000;
+      box-shadow: 0 1px 0 #d4ff00, 0 -1px 0 #d4ff00;   /* breathing room above/below, never covers the comma */
     }
     .intro .w {
       border-radius: 2px;
@@ -141,10 +126,9 @@
       color: #000;
     }
     .intro .nowrap { white-space: nowrap; }
-    .m-br { display: none; }
     @media (max-width: 600px) {
-      .intro { font-size: min(16px, 4.2vw); }
-      .m-br { display: inline; }
+      .intro { font-size: 16px; }
+      .intro .nowrap { white-space: normal; }
     }
     .has-eye, .has-eye * { cursor: none !important; }
     .eye-cursor {
@@ -174,7 +158,7 @@
     .eye-cursor.on-link::after { transform: scale(2.2); }
     .eye-cursor.on-lime::after { background: #000; }
     @media (prefers-reduced-motion: reduce) {
-      .pupil, .role, .reel, .reel > span { transition: none; }
+      .pupil, .intro .hl { transition: none; }
     }
   </style>
 </head>
@@ -183,7 +167,7 @@
     <div class="logo-wrap"><img src="logo.png" alt="Strive logo" class="logo"><span class="pupil" aria-hidden="true"></span></div>
     <h1>Strive</h1>
     <p class="intro">
-      <span class="nowrap">A curated place for the top 1% of</span><br class="m-br"> <span class="role" aria-label="chiefs of staff, founding engineers, and tech operators."><span class="reel"><span><b class="t">chiefs of staff</b></span><span><b class="t">founding engineers</b></span><span><b class="t">tech operators</b></span><span aria-hidden="true"><b class="t">chiefs of staff</b></span></span></span><br>
+      <span class="nowrap">A curated place for the top 1% of <span class="hl">chiefs of staff</span>, <span class="hl">founding engineers</span>, and <span class="hl">tech operators</span>.</span><br>
       <span class="nowrap">Alongside a global community of 300+ members.</span><br>
       <span class="nowrap">Founders and investors welcome.</span>
     </p>
@@ -202,39 +186,17 @@
     (function () {
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // rotating role: fixed-width slot (widest word), words roll inside, nothing else moves
-      var role = document.querySelector('.role');
-      var reel = role.querySelector('.reel');
-      var items = reel.children;           // last item repeats the first for a seamless loop
-      var idx = 0;
-      function fit() {
-        var max = 0;
-        for (var j = 0; j < items.length; j++) max = Math.max(max, items[j].querySelector('.t').offsetWidth);
-        role.style.width = Math.ceil(max) + 'px';
-      }
-      function show(i, animate) {
-        if (!animate) reel.style.transition = 'none';
-        reel.style.transform = 'translateY(' + (-1.6 * i) + 'em)';
-        for (var j = 0; j < items.length; j++) items[j].style.opacity = (j === i) ? 1 : 0;
-        if (!animate) { reel.offsetHeight; reel.style.transition = ''; }
-      }
-      fit(); show(0, false);
-      window.addEventListener('resize', fit);
-      reel.addEventListener('transitionend', function (e) {
-        if (e.target !== reel || e.propertyName !== 'transform') return;
-        if (idx === items.length - 1) {    // silently jump back to the identical first item
-          for (var j = 0; j < items.length; j++) items[j].style.transition = 'none';
-          idx = 0; show(0, false);
-          reel.offsetHeight;
-          for (var j = 0; j < items.length; j++) items[j].style.transition = '';
-        }
-      });
+      // the highlight walks across the three roles; nothing else moves
+      var roles = document.querySelectorAll('.intro .hl');
+      var cur = 0;
+      roles[0].classList.add('on');
       if (!reduce) {
         setInterval(function () {
-          if (document.hidden || idx === items.length - 1) return;
-          idx++;
-          show(idx, true);
-        }, 2600);
+          if (document.hidden) return;
+          roles[cur].classList.remove('on');
+          cur = (cur + 1) % roles.length;
+          roles[cur].classList.add('on');
+        }, 2200);
       }
 
       // highlight words on hover
@@ -243,7 +205,7 @@
       var nodes = [];
       while (walker.nextNode()) {
         var n = walker.currentNode;
-        if (n.parentNode.closest('.role') || !n.nodeValue.trim()) continue;
+        if (n.parentNode.closest('.hl') || !n.nodeValue.trim()) continue;
         nodes.push(n);
       }
       nodes.forEach(function (n) {
@@ -302,7 +264,7 @@
         document.addEventListener('mouseover', function (e) {
           var t = e.target;
           dot.classList.toggle('on-link', !!t.closest('a'));
-          dot.classList.toggle('on-lime', !!t.closest('.cta-button, .intro .w'));
+          dot.classList.toggle('on-lime', !!t.closest('.cta-button, .intro .w, .intro .hl'));
         });
       } else {
         // touch: the eye glances around
