@@ -116,6 +116,20 @@
       opacity: 0;
       transform: translateY(-6px);
     }
+    .intro .w {
+      border-radius: 2px;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .intro .w:hover {
+      background-color: #d4ff00;
+      color: #000;
+    }
+    .intro .nowrap { white-space: nowrap; }
+    .m-br { display: none; }
+    @media (max-width: 600px) {
+      .intro { font-size: min(16px, 4.2vw); }
+      .m-br { display: inline; }
+    }
     @media (prefers-reduced-motion: reduce) {
       .pupil, .role { transition: none; }
     }
@@ -125,10 +139,10 @@
   <div class="container">
     <div class="logo-wrap"><img src="logo.png" alt="Strive logo" class="logo"><span class="pupil" aria-hidden="true"></span></div>
     <h1>Strive</h1>
-    <p>
-      A curated place for the top 1% of <span class="role" aria-live="polite">chiefs of staff</span>.<br>
-      Alongside a global community of 300+ members.<br>
-      Founders and investors welcome.
+    <p class="intro">
+      <span class="nowrap">A curated place for the top 1% of</span><br class="m-br"> <span class="nowrap"><span class="role w" aria-live="polite">chiefs of staff</span>.</span><br>
+      <span class="nowrap">Alongside a global community of 300+ members.</span><br>
+      <span class="nowrap">Founders and investors welcome.</span>
     </p>
     <a class="cta-button" href="https://airtable.com/appuKwDPupWiyQUrj/pagFAksYcFxbTIYL1/form" target="_blank" rel="noopener">Join the community</a>
 
@@ -159,6 +173,28 @@
           }, 250);
         }, 2200);
       }
+
+      // highlight words on hover
+      var intro = document.querySelector('.intro');
+      var walker = document.createTreeWalker(intro, NodeFilter.SHOW_TEXT);
+      var nodes = [];
+      while (walker.nextNode()) {
+        var n = walker.currentNode;
+        if (n.parentNode.closest('.role') || !n.nodeValue.trim()) continue;
+        nodes.push(n);
+      }
+      nodes.forEach(function (n) {
+        var frag = document.createDocumentFragment();
+        n.nodeValue.split(/(\s+)/).forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          var w = document.createElement('span');
+          w.className = 'w';
+          w.textContent = part;
+          frag.appendChild(w);
+        });
+        n.parentNode.replaceChild(frag, n);
+      });
 
       // the S watches you
       var pupil = document.querySelector('.pupil');
