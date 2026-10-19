@@ -4,197 +4,107 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Strive</title>
-  <meta name="description" content="A curated place for the top 1% of chiefs of staff, founding engineers, and tech operators. 300+ members worldwide.">
+  <meta name="description" content="A curated place for the top 1% of chiefs of staff, founding engineers, and tech operators.">
   <meta property="og:title" content="Strive">
   <meta property="og:description" content="A curated place for the top 1% of chiefs of staff, founding engineers, and tech operators.">
-  <meta property="og:image" content="Strive%20(logo).png">
-  <link rel="icon" type="image/png" href="Strive%20(logo).png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <meta property="og:image" content="logo.png">
+  <link rel="icon" type="image/png" href="logo.png">
   <style>
-    :root {
-      --bg: #000;
-      --fg: #f5f5f2;
-      --muted: #8a8a85;
-      --line: #1f1f1d;
-      --accent: #d4ff00;
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
     body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: "Inter", system-ui, sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: "Times New Roman", Times, serif;
       -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 720px;
       min-height: 100vh;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
-    }
-    a { color: inherit; }
-
-    .wrap {
-      width: 100%;
-      max-width: 1040px;
+      justify-content: center;
+      align-items: center;
       margin: 0 auto;
-      padding: 0 32px;
+      padding: 64px 24px;
+      text-align: center;
     }
-
-    /* nav */
-    nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 28px 0;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      font-weight: 500;
-      letter-spacing: -0.01em;
-    }
-    .brand img {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-    }
-    .nav-link {
-      font-size: 14px;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color .2s ease;
-    }
-    .nav-link:hover { color: var(--fg); }
-
-    /* hero */
-    main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-    }
-    .hero {
-      padding: 12vh 0 14vh;
-    }
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 32px;
-    }
-    .eyebrow .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
+    img.logo {
+      display: block;
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 24px;
     }
     h1 {
-      font-family: "Instrument Serif", "Times New Roman", serif;
-      font-weight: 400;
-      font-size: clamp(44px, 7.5vw, 88px);
-      line-height: 1.02;
-      letter-spacing: -0.02em;
-      margin: 0 0 28px;
-      max-width: 14ch;
+      font-size: 40px;
+      font-weight: normal;
+      letter-spacing: -0.01em;
+      margin: 0 0 24px;
     }
-    h1 em { color: var(--accent); }
-    .lede {
+    p {
       font-size: 18px;
-      color: var(--muted);
-      max-width: 46ch;
-      margin: 0 0 40px;
+      line-height: 1.6;
+      margin: 0 0 32px;
     }
-    .lede strong { color: var(--fg); font-weight: 500; }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 20px;
-    }
-    .cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--accent);
+    .cta-button {
+      display: inline-block;
+      background-color: #d4ff00;
       color: #000;
       text-decoration: none;
-      font-weight: 500;
-      font-size: 15px;
-      padding: 14px 22px;
-      border-radius: 999px;
-      transition: transform .2s ease, background .2s ease;
+      font-size: 18px;
+      padding: 12px 24px;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
     }
-    .cta:hover { background: #e2ff4d; transform: translateY(-1px); }
-    .cta span { transition: transform .2s ease; }
-    .cta:hover span { transform: translateX(3px); }
-    .note { font-size: 14px; color: var(--muted); }
-
-    /* footer */
-    footer { border-top: 1px solid var(--line); }
-    .foot {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 16px;
-      padding-top: 28px;
-      padding-bottom: 36px;
-      font-size: 14px;
-      color: var(--muted);
+    .cta-button:hover {
+      background-color: #c0ea00;
+    }
+    .definition,
+    .footer {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #888;
     }
     .definition {
-      font-family: "Instrument Serif", serif;
-      font-size: 17px;
-      max-width: 60ch;
-      margin: 0;
+      font-style: italic;
+      margin: 48px 0 0;
     }
-    .definition em { color: var(--fg); }
-    .tagline { margin: 0; white-space: nowrap; }
-
-    @media (max-width: 600px) {
-      .wrap { padding: 0 20px; }
-      .hero { padding: 8vh 0 10vh; }
-      .lede { font-size: 16px; }
-      .tagline { white-space: normal; }
+    .definition em {
+      font-style: normal;
+      color: #fff;
+    }
+    .footer {
+      margin-top: 32px;
+    }
+    a.footer-link {
+      color: #888;
+      text-decoration: none;
+    }
+    a.footer-link:hover {
+      color: #d4ff00;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <nav>
-      <a class="brand" href="./">
-        <img src="Strive%20(logo).png" alt="">
-        Strive
-      </a>
-      <a class="nav-link" href="https://www.linkedin.com/company/founderassociate/" target="_blank" rel="noopener">LinkedIn ↗</a>
-    </nav>
+  <div class="container">
+    <img src="logo.png" alt="Strive logo" class="logo">
+    <h1>Strive</h1>
+    <p>
+      A curated place for the top 1% of chiefs of staff, founding engineers, and tech operators.<br>
+      Alongside a global community of 300+ members.<br>
+      Founders and investors welcome.
+    </p>
+    <a class="cta-button" href="https://airtable.com/appuKwDPupWiyQUrj/pagFAksYcFxbTIYL1/form" target="_blank" rel="noopener">Join the community</a>
+
+    <p class="definition">
+      <em>strive</em> (verb): to try very hard to do something or to make something happen, especially for a long time or against difficulties
+    </p>
+
+    <div class="footer">
+      Join. Build. Strive.<br>
+      <a class="footer-link" href="https://www.linkedin.com/company/founderassociate/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
   </div>
-
-  <main>
-    <div class="wrap">
-      <section class="hero">
-        <div class="eyebrow"><span class="dot"></span>300+ members worldwide</div>
-        <h1>For the top 1% of <em>tech operators.</em></h1>
-        <p class="lede">
-          A curated place for <strong>chiefs of staff</strong>, <strong>founding engineers</strong> and <strong>tech operators</strong>. Founders and investors welcome.
-        </p>
-        <div class="actions">
-          <a class="cta" href="https://airtable.com/appuKwDPupWiyQUrj/pagFAksYcFxbTIYL1/form" target="_blank" rel="noopener">Join the community <span>→</span></a>        </div>
-      </section>
-    </div>
-  </main>
-
-  <footer>
-    <div class="wrap foot">
-      <p class="definition"><em>strive</em> (verb): to try very hard to do something or to make something happen, especially for a long time or against difficulties.</p>
-      <p class="tagline">Join. Build. Strive.</p>
-    </div>
-  </footer>
 </body>
 </html>
