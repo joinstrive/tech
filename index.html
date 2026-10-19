@@ -114,7 +114,7 @@
       height: 1.25em;
       line-height: 1.25em;
       border-bottom: 2px solid #d4ff00;
-      transition: width 0.45s cubic-bezier(.65,0,.35,1);
+      transition: width 0.25s ease;
     }
     .reel {
       display: block;
@@ -140,6 +140,33 @@
       .intro { font-size: min(16px, 4.2vw); }
       .m-br { display: inline; }
     }
+    .has-eye, .has-eye * { cursor: none !important; }
+    .eye-cursor {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 9px;
+      height: 9px;
+      margin: -4.5px 0 0 -4.5px;
+      border-radius: 50%;
+      background: #d4ff00;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0;
+      will-change: transform;
+    }
+    .eye-cursor::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: inherit;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .eye-cursor { background: none; }
+    .eye-cursor::after { background: #d4ff00; }
+    .eye-cursor.on-link::after { transform: scale(2.2); }
+    .eye-cursor.on-lime::after { background: #000; }
     @media (prefers-reduced-motion: reduce) {
       .pupil, .role, .reel { transition: none; }
     }
@@ -174,23 +201,31 @@
       var reel = role.querySelector('.reel');
       var items = reel.children;           // last item repeats the first for a seamless loop
       var idx = 0;
-      function fit() { role.style.width = items[idx].offsetWidth + 'px'; }
-      fit();
-      window.addEventListener('resize', fit);
+      function w(i) { return items[i].offsetWidth; }
+      function setWidth(px) { role.style.width = px + 'px'; }
+      setWidth(w(0));
+      window.addEventListener('resize', function () { setWidth(w(idx)); });
       reel.addEventListener('transitionend', function (e) {
-        if (e.propertyName !== 'transform' || idx !== items.length - 1) return;
-        reel.style.transition = 'none';
-        idx = 0;
-        reel.style.transform = 'translateY(0)';
-        reel.offsetHeight;
-        reel.style.transition = '';
+        if (e.propertyName !== 'transform') return;
+        if (idx === items.length - 1) {
+          reel.style.transition = 'none';
+          idx = 0;
+          reel.style.transform = 'translateY(0)';
+          reel.offsetHeight;
+          reel.style.transition = '';
+        }
+        setWidth(w(idx));                  // shrink only once the old word is gone
       });
       if (!reduce) {
         setInterval(function () {
           if (document.hidden || idx === items.length - 1) return;
+          var prev = idx;
           idx++;
-          reel.style.transform = 'translateY(' + (-1.25 * idx) + 'em)';
-          fit();
+          var grow = w(idx) > w(prev);
+          if (grow) setWidth(w(idx));             // 1. make room first
+          setTimeout(function () {                // 2. then roll
+            reel.style.transform = 'translateY(' + (-1.25 * idx) + 'em)';
+          }, grow ? 260 : 0);                     // 3. shrink happens after the roll (transitionend)
         }, 2400);
       }
 
@@ -216,28 +251,69 @@
         n.parentNode.replaceChild(frag, n);
       });
 
-      // the S watches you
+      // the eye in the S becomes your cursor
       var pupil = document.querySelector('.pupil');
       var wrap = document.querySelector('.logo-wrap');
-      var MAX = 5;
-      function look(x, y) {
-        var r = pupil.getBoundingClientRect();
-        var dx = x - (r.left + r.width / 2);
-        var dy = y - (r.top + r.height / 2);
-        var d = Math.hypot(dx, dy) || 1;
-        var k = Math.min(MAX, d / 20) / d;
-        pupil.style.transform = 'translate(' + dx * k + 'px,' + dy * k + 'px)';
-      }
-      window.addEventListener('mousemove', function (e) { look(e.clientX, e.clientY); });
-      window.addEventListener('touchstart', function (e) {
-        var t = e.touches[0]; look(t.clientX, t.clientY);
-      }, { passive: true });
-      // on touch devices, glance around now and then
-      if (!reduce && !window.matchMedia('(hover: hover)').matches) {
-        setInterval(function () {
-          var w = wrap.getBoundingClientRect();
-          look(w.left + (Math.random() - 0.5) * 400, w.top + (Math.random() - 0.5) * 400);
-        }, 1800);
+      var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+      if (fine) {
+        var dot = document.createElement('div');
+        dot.className = 'eye-cursor';
+        document.body.appendChild(dot);
+        document.documentElement.classList.add('has-eye');
+
+        function home() {
+          var r = pupil.getBoundingClientRect();
+          return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        }
+        var pos = home(), target = pos, out = true, settled = false, t0 = 0;
+        function place() { dot.style.transform = 'translate(' + pos.x + 'px,' + pos.y + 'px)'; }
+        place();
+
+        function tick(now) {
+          if (out) target = home();
+          // fly smoothly for a moment when leaving/returning to the logo, then stick to the mouse
+          var k = (reduce || (settled && !out)) ? 1 : 0.22;
+          pos = { x: pos.x + (target.x - pos.x) * k, y: pos.y + (target.y - pos.y) * k };
+          if (!out && !settled && now - t0 > 500) settled = true;
+          if (out && Math.hypot(target.x - pos.x, target.y - pos.y) < 0.5) {
+            pupil.style.opacity = 1; dot.style.opacity = 0;
+          }
+          place();
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+
+        window.addEventListener('mousemove', function (e) {
+          target = { x: e.clientX, y: e.clientY };
+          if (out) { out = false; settled = false; t0 = performance.now(); pupil.style.opacity = 0; dot.style.opacity = 1; }
+        });
+        document.addEventListener('mouseleave', function () { out = true; });
+        window.addEventListener('blur', function () { out = true; });
+
+        document.addEventListener('mouseover', function (e) {
+          var t = e.target;
+          dot.classList.toggle('on-link', !!t.closest('a'));
+          dot.classList.toggle('on-lime', !!t.closest('.cta-button, .intro .w'));
+        });
+      } else {
+        // touch: the eye glances around
+        var MAX = 5;
+        function look(x, y) {
+          var r = pupil.getBoundingClientRect();
+          var dx = x - (r.left + r.width / 2), dy = y - (r.top + r.height / 2);
+          var d = Math.hypot(dx, dy) || 1, k = Math.min(MAX, d / 20) / d;
+          pupil.style.transform = 'translate(' + dx * k + 'px,' + dy * k + 'px)';
+        }
+        window.addEventListener('touchstart', function (e) {
+          var t = e.touches[0]; look(t.clientX, t.clientY);
+        }, { passive: true });
+        if (!reduce) {
+          setInterval(function () {
+            var r = wrap.getBoundingClientRect();
+            look(r.left + (Math.random() - 0.5) * 400, r.top + (Math.random() - 0.5) * 400);
+          }, 1800);
+        }
       }
     })();
   </script>
