@@ -108,28 +108,33 @@
     }
     .role {
       display: inline-block;
+      position: relative;
       vertical-align: top;
       height: 1.6em;
-      clip-path: inset(0 -100vw);           /* clip vertically only, never cut a word sideways */
-      transition: width 0.5s cubic-bezier(.65,0,.35,1);
+      clip-path: inset(0 -100vw);           /* clip vertically only */
+    }
+    .role::after {                           /* fixed lime bar, never resizes */
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0.2em;
+      height: 2px;
+      background: #d4ff00;
     }
     .reel {
       display: block;
-      text-align: left;
       transition: transform 0.5s cubic-bezier(.65,0,.35,1);
     }
     .reel > span {
       display: block;
-      width: max-content;
       height: 1.6em;
       line-height: 1.6em;
+      text-align: center;
       white-space: nowrap;
       transition: opacity 0.5s ease;
     }
-    .reel u {
-      text-decoration: underline 2px #d4ff00;
-      text-underline-offset: 4px;
-    }
+    .reel .t { font-weight: normal; }
     .intro .w {
       border-radius: 2px;
       transition: background-color 0.15s ease, color 0.15s ease;
@@ -181,7 +186,7 @@
     <div class="logo-wrap"><img src="logo.png" alt="Strive logo" class="logo"><span class="pupil" aria-hidden="true"></span></div>
     <h1>Strive</h1>
     <p class="intro">
-      <span class="nowrap">A curated place for the top 1% of</span><br class="m-br"> <span class="role" aria-label="chiefs of staff, founding engineers, and tech operators."><span class="reel"><span><u>chiefs of staff</u>.</span><span><u>founding engineers</u>.</span><span><u>tech operators</u>.</span><span aria-hidden="true"><u>chiefs of staff</u>.</span></span></span><br>
+      <span class="nowrap">A curated place for the top 1% of</span><br class="m-br"> <span class="role" aria-label="chiefs of staff, founding engineers, and tech operators."><span class="reel"><span><b class="t">chiefs of staff</b></span><span><b class="t">founding engineers</b></span><span><b class="t">tech operators</b></span><span aria-hidden="true"><b class="t">chiefs of staff</b></span></span></span><br>
       <span class="nowrap">Alongside a global community of 300+ members.</span><br>
       <span class="nowrap">Founders and investors welcome.</span>
     </p>
@@ -200,20 +205,24 @@
     (function () {
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // rotating role: width and roll move together, same duration, same easing
+      // rotating role: fixed-width slot (widest word), words roll inside, nothing else moves
       var role = document.querySelector('.role');
       var reel = role.querySelector('.reel');
       var items = reel.children;           // last item repeats the first for a seamless loop
       var idx = 0;
+      function fit() {
+        var max = 0;
+        for (var j = 0; j < items.length; j++) max = Math.max(max, items[j].querySelector('.t').offsetWidth);
+        role.style.width = Math.ceil(max) + 'px';
+      }
       function show(i, animate) {
-        if (!animate) { role.style.transition = reel.style.transition = 'none'; }
-        role.style.width = items[i].offsetWidth + 'px';
+        if (!animate) reel.style.transition = 'none';
         reel.style.transform = 'translateY(' + (-1.6 * i) + 'em)';
         for (var j = 0; j < items.length; j++) items[j].style.opacity = (j === i) ? 1 : 0;
-        if (!animate) { reel.offsetHeight; role.style.transition = reel.style.transition = ''; }
+        if (!animate) { reel.offsetHeight; reel.style.transition = ''; }
       }
-      show(0, false);
-      window.addEventListener('resize', function () { show(idx, false); });
+      fit(); show(0, false);
+      window.addEventListener('resize', fit);
       reel.addEventListener('transitionend', function (e) {
         if (e.target !== reel || e.propertyName !== 'transform') return;
         if (idx === items.length - 1) {    // silently jump back to the identical first item
