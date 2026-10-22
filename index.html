@@ -8,7 +8,7 @@
   <meta property="og:title" content="Strive">
   <meta property="og:description" content="A curated place for the top 1% of chiefs of staff, founding engineers, and tech operators.">
   <meta property="og:image" content="logo.png">
-  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -135,11 +135,9 @@
       position: fixed;
       left: 0;
       top: 0;
-      width: 9px;
-      height: 9px;
-      margin: -4.5px 0 0 -4.5px;
-      border-radius: 50%;
-      background: #d4ff00;
+      width: 36px;
+      height: 36px;
+      margin: -18px 0 0 -18px;
       pointer-events: none;
       z-index: 9999;
       opacity: 0;
@@ -149,16 +147,33 @@
       content: "";
       position: absolute;
       inset: 0;
+      box-sizing: border-box;
       border-radius: 50%;
-      background: inherit;
-      transition: transform 0.2s ease, background-color 0.2s ease;
+      border: 1.5px solid transparent;
+      background: #d4ff00;
+      transform: scale(0.25);                /* 9px dot, same as the pupil */
+      transition: transform 0.35s cubic-bezier(.2,.8,.2,1),
+                  background-color 0.2s ease, border-color 0.2s ease;
     }
-    .eye-cursor { background: none; }
-    .eye-cursor::after { background: #d4ff00; }
-    .eye-cursor.on-link::after { transform: scale(2.2); }
     .eye-cursor.on-lime::after { background: #000; }
+    .eye-cursor.on-link::after {             /* footer links: hollow lime ring */
+      transform: scale(0.8);
+      background: transparent;
+      border-color: #d4ff00;
+    }
+    .eye-cursor.on-cta::after {              /* button: hollow black ring, text stays readable */
+      transform: scale(1);
+      background: transparent;
+      border-color: #000;
+    }
+    .eye-cursor.down::after { transform: scale(0.6); }
+    .cta-button {
+      transition: background-color 0.2s ease, transform 0.35s cubic-bezier(.2,.8,.2,1);
+    }
+    .cta-button:focus { outline: none; }
+    .cta-button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
     @media (prefers-reduced-motion: reduce) {
-      .pupil, .intro .hl { transition: none; }
+      .pupil, .intro .hl, .cta-button, .eye-cursor::after { transition: none; }
     }
   </style>
 </head>
@@ -242,8 +257,8 @@
 
         function tick(now) {
           if (out) target = home();
-          // fly smoothly for a moment when leaving/returning to the logo, then stick to the mouse
-          var k = (reduce || (settled && !out)) ? 1 : 0.22;
+          // glide out of / back into the logo, then follow with a light, fluid lag
+          var k = reduce ? 1 : (settled && !out) ? 0.45 : 0.2;
           pos = { x: pos.x + (target.x - pos.x) * k, y: pos.y + (target.y - pos.y) * k };
           if (!out && !settled && now - t0 > 500) settled = true;
           if (out && Math.hypot(target.x - pos.x, target.y - pos.y) < 0.5) {
@@ -263,9 +278,24 @@
 
         document.addEventListener('mouseover', function (e) {
           var t = e.target;
-          dot.classList.toggle('on-link', !!t.closest('a'));
-          dot.classList.toggle('on-lime', !!t.closest('.cta-button, .intro .w, .intro .hl'));
+          var cta = !!t.closest('.cta-button');
+          dot.classList.toggle('on-cta', cta);
+          dot.classList.toggle('on-link', !cta && !!t.closest('a'));
+          dot.classList.toggle('on-lime', !!t.closest('.intro .w, .intro .hl'));
         });
+        window.addEventListener('mousedown', function () { dot.classList.add('down'); });
+        window.addEventListener('mouseup', function () { dot.classList.remove('down'); });
+
+        // the button leans gently toward the cursor
+        var btn = document.querySelector('.cta-button');
+        if (!reduce) {
+          btn.addEventListener('mousemove', function (e) {
+            var r = btn.getBoundingClientRect();
+            var dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+            btn.style.transform = 'translate(' + dx * 0.12 + 'px,' + dy * 0.2 + 'px)';
+          });
+          btn.addEventListener('mouseleave', function () { btn.style.transform = ''; });
+        }
       } else {
         // touch: the eye glances around
         var MAX = 5;
